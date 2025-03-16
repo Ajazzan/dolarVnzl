@@ -11,21 +11,21 @@
 </head>
 <body>
 
-  <h1>Calculadora de Conversión Bs/USD</h1>
+  <h1>Calculadora de Conversion Bs/USD</h1>
 
   <div>
     <p>Tasa actual: <span id="tasa">Cargando...</span> Bs/USD</p>
   </div>
 
   <div class="container">
-    <h3>De dólares a bolívares</h3>
-    <input type="number" id="dolares" placeholder="Monto en dólares" oninput="convertirADolares()">
+    <h3>De dolares a bolivares</h3>
+    <input type="number" id="dolares" placeholder="Monto en dolares" oninput="convertirADolares()">
     <p id="resultado_dolares">-- Bs</p>
   </div>
 
   <div class="container">
-    <h3>De bolívares a dólares</h3>
-    <input type="number" id="bolivares" placeholder="Monto en bolívares" oninput="convertirABolivares()">
+    <h3>De bolivares a dolares</h3>
+    <input type="number" id="bolivares" placeholder="Monto en bolivares" oninput="convertirABolivares()">
     <p id="resultado_bolivares">-- USD</p>
   </div>
 
@@ -42,7 +42,7 @@
         });
         const data = await respuesta.json();
         
-        // Obtener la tasa del dólar de la respuesta JSON
+        // Obtener la tasa del dolar de la respuesta JSON
         tasa = parseFloat(data.monitors.usd.price) + 1; // Sumar 1 bolívar y redondear hacia arriba
         tasa = Math.ceil(tasa); // Redondeo hacia arriba
         document.getElementById('tasa').innerText = tasa;
@@ -55,7 +55,7 @@
     // Llamamos a la función al cargar la página
     obtenerTasa();
 
-    // Convertir de dólares a bolívares
+    // Convertir de dolares a bolivares
     function convertirADolares() {
       const dolares = parseFloat(document.getElementById('dolares').value);
       if (isNaN(dolares)) {
