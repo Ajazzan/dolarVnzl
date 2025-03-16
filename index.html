@@ -43,7 +43,7 @@
         const data = await respuesta.json();
         
         // Obtener la tasa del dolar de la respuesta JSON
-        tasa = parseFloat(data.monitors.usd.price) + 1; // Sumar 1 bolívar y redondear hacia arriba
+        tasa = parseFloat(data.monitors.usd.price) + 1; // Sumar 1 bolÃ­var y redondear hacia arriba
         tasa = Math.ceil(tasa); // Redondeo hacia arriba
         document.getElementById('tasa').innerText = tasa;
       } catch (error) {
@@ -52,7 +52,7 @@
       }
     }
 
-    // Llamamos a la función al cargar la página
+    // Llamamos a la funciÃ³n al cargar la pÃ¡gina
     obtenerTasa();
 
     // Convertir de dolares a bolivares
@@ -65,12 +65,12 @@
       const resultado = dolares * tasa;
       document.getElementById('resultado_dolares').innerText = resultado.toFixed(2) + " Bs";
       
-      // Convertir el monto de bolívares automáticamente
+      // Convertir el monto de bolÃ­vares automÃ¡ticamente
       const bolivares = dolares * tasa;
       document.getElementById('bolivares').value = bolivares.toFixed(2);
     }
 
-    // Convertir de bolívares a dólares
+    // Convertir de bolÃ­vares a dÃ³lares
     function convertirABolivares() {
       const bolivares = parseFloat(document.getElementById('bolivares').value);
       if (isNaN(bolivares)) {
@@ -80,7 +80,7 @@
       const resultado = bolivares / tasa;
       document.getElementById('resultado_bolivares').innerText = resultado.toFixed(2) + " USD";
       
-      // Convertir el monto de dólares automáticamente
+      // Convertir el monto de dÃ³lares automÃ¡ticamente
       const dolares = bolivares / tasa;
       document.getElementById('dolares').value = dolares.toFixed(2);
     }
