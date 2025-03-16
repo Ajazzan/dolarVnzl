@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Calculadora Bs/USD</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Responsiveness -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     :root {
       --primary-color: #3498db;
@@ -108,7 +108,6 @@
 
   <script>
     let tasa = 0;
-    let bloqueado = false;
 
     async function obtenerTasa() {
       try {
@@ -127,33 +126,25 @@
     obtenerTasa();
 
     function convertirADolares() {
-      if (tasa === 0 || bloqueado) return;
-      bloqueado = true;
+      if (tasa === 0) return;
       const dolares = parseFloat(document.getElementById('dolares').value);
       if (isNaN(dolares)) {
         document.getElementById('resultado_dolares').innerText = "-- Bs";
-        document.getElementById('bolivares').value = "";
       } else {
         const resultado = dolares * tasa;
         document.getElementById('resultado_dolares').innerText = resultado.toFixed(2) + " Bs";
-        document.getElementById('bolivares').value = resultado.toFixed(2);
       }
-      bloqueado = false;
     }
 
     function convertirABolivares() {
-      if (tasa === 0 || bloqueado) return;
-      bloqueado = true;
+      if (tasa === 0) return;
       const bolivares = parseFloat(document.getElementById('bolivares').value);
       if (isNaN(bolivares)) {
         document.getElementById('resultado_bolivares').innerText = "-- USD";
-        document.getElementById('dolares').value = "";
       } else {
         const resultado = bolivares / tasa;
         document.getElementById('resultado_bolivares').innerText = resultado.toFixed(2) + " USD";
-        document.getElementById('dolares').value = resultado.toFixed(2);
       }
-      bloqueado = false;
     }
   </script>
 
