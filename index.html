@@ -3,86 +3,157 @@
 <head>
   <meta charset="UTF-8">
   <title>Calculadora Bs/USD</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Responsiveness -->
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-    input { padding: 10px; margin: 10px; width: 200px; }
-    .container { margin-top: 30px; }
+    :root {
+      --primary-color: #3498db;
+      --secondary-color: #f1f1f1;
+      --text-color: #333;
+      --border-radius: 12px;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--secondary-color);
+      margin: 0;
+      padding: 0;
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: var(--primary-color);
+      width: 100%;
+      padding: 20px 0;
+      text-align: center;
+      color: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+
+    .tasa {
+      margin: 20px 0;
+      font-size: 1.2rem;
+    }
+
+    .container {
+      background-color: white;
+      padding: 20px;
+      margin: 15px;
+      border-radius: var(--border-radius);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 90%;
+    }
+
+    h3 {
+      margin-top: 0;
+      color: var(--primary-color);
+    }
+
+    input {
+      padding: 12px;
+      margin-top: 10px;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: var(--border-radius);
+      box-sizing: border-box;
+      font-size: 1rem;
+    }
+
+    p {
+      margin-top: 15px;
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 500px) {
+      h1 {
+        font-size: 1.4rem;
+      }
+
+      .container {
+        padding: 15px;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <h1>Calculadora de Conversion Bs/USD</h1>
+  <header>
+    <h1>Calculadora Bs/USD</h1>
+  </header>
 
-  <div>
-    <p>Tasa actual: <span id="tasa">Cargando...</span> Bs/USD</p>
+  <div class="tasa">
+    <p>Tasa actual: <strong><span id="tasa">Cargando...</span></strong> Bs/USD</p>
   </div>
 
   <div class="container">
-    <h3>De dolares a bolivares</h3>
-    <input type="number" id="dolares" placeholder="Monto en dolares" oninput="convertirADolares()">
+    <h3>De dólares a bolívares</h3>
+    <input type="number" id="dolares" placeholder="Monto en dólares" oninput="convertirADolares()" step="0.01">
     <p id="resultado_dolares">-- Bs</p>
   </div>
 
   <div class="container">
-    <h3>De bolivares a dolares</h3>
-    <input type="number" id="bolivares" placeholder="Monto en bolivares" oninput="convertirABolivares()">
+    <h3>De bolívares a dólares</h3>
+    <input type="number" id="bolivares" placeholder="Monto en bolívares" oninput="convertirABolivares()" step="0.01">
     <p id="resultado_bolivares">-- USD</p>
   </div>
 
   <script>
     let tasa = 0;
+    let bloqueado = false;
 
-    // Obtener la tasa desde la API usando fetch
     async function obtenerTasa() {
       try {
         const respuesta = await fetch('https://pydolarve.org/api/v1/dollar?page=bcv&format_date=default&rounded_price=false', {
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          headers: { 'Content-Type': 'application/json' }
         });
         const data = await respuesta.json();
-        
-        // Obtener la tasa del dolar de la respuesta JSON
-        tasa = parseFloat(data.monitors.usd.price) + 1; // Sumar 1 bolívar y redondear hacia arriba
-        tasa = Math.ceil(tasa); // Redondeo hacia arriba
-        document.getElementById('tasa').innerText = tasa;
+        tasa = Math.ceil(parseFloat(data.monitors.usd.price) + 1);
+        document.getElementById('tasa').innerText = tasa.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       } catch (error) {
         document.getElementById('tasa').innerText = "Error al obtener tasa";
         console.error("Error al obtener la tasa:", error);
       }
     }
 
-    // Llamamos a la función al cargar la página
     obtenerTasa();
 
-    // Convertir de dolares a bolivares
     function convertirADolares() {
+      if (tasa === 0 || bloqueado) return;
+      bloqueado = true;
       const dolares = parseFloat(document.getElementById('dolares').value);
       if (isNaN(dolares)) {
         document.getElementById('resultado_dolares').innerText = "-- Bs";
-        return;
+        document.getElementById('bolivares').value = "";
+      } else {
+        const resultado = dolares * tasa;
+        document.getElementById('resultado_dolares').innerText = resultado.toFixed(2) + " Bs";
+        document.getElementById('bolivares').value = resultado.toFixed(2);
       }
-      const resultado = dolares * tasa;
-      document.getElementById('resultado_dolares').innerText = resultado.toFixed(2) + " Bs";
-      
-      // Convertir el monto de bolívares automáticamente
-      const bolivares = dolares * tasa;
-      document.getElementById('bolivares').value = bolivares.toFixed(2);
+      bloqueado = false;
     }
 
-    // Convertir de bolívares a dólares
     function convertirABolivares() {
+      if (tasa === 0 || bloqueado) return;
+      bloqueado = true;
       const bolivares = parseFloat(document.getElementById('bolivares').value);
       if (isNaN(bolivares)) {
         document.getElementById('resultado_bolivares').innerText = "-- USD";
-        return;
+        document.getElementById('dolares').value = "";
+      } else {
+        const resultado = bolivares / tasa;
+        document.getElementById('resultado_bolivares').innerText = resultado.toFixed(2) + " USD";
+        document.getElementById('dolares').value = resultado.toFixed(2);
       }
-      const resultado = bolivares / tasa;
-      document.getElementById('resultado_bolivares').innerText = resultado.toFixed(2) + " USD";
-      
-      // Convertir el monto de dólares automáticamente
-      const dolares = bolivares / tasa;
-      document.getElementById('dolares').value = dolares.toFixed(2);
+      bloqueado = false;
     }
   </script>
 
