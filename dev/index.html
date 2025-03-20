@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora Bs/USD</title>
+  <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=Ei0s3un949Vo&format=png&color=000000">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header>
+    <h1>Calculadora Bs/USD</h1>
+    <button id="theme-toggle">ðŸŒ™</button>
+  </header>
+
+  <div class="tasa">
+    <p>Tasa actual: <strong><span id="tasa">Cargando...</span></strong> Bs/USD</p>
+  </div>
+
+  <!-- USD to Bs Section -->
+  <div class="container">
+    <h3>De d¨®lares a bol¨ªvares</h3>
+    <div class="conversion-row">
+      <div class="conversion">
+        <input type="number" placeholder="Monto en d¨®lares" oninput="convertirADolares(this, 'resultado1')" step="0.01">
+        <p id="resultado1">-- Bs</p>
+      </div>
+      <div class="conversion">
+        <input type="number" placeholder="Monto en d¨®lares" oninput="convertirADolares(this, 'resultado2')" step="0.01">
+        <p id="resultado2">-- Bs</p>
+      </div>
+      <div class="conversion">
+        <input type="number" placeholder="Monto en d¨®lares" oninput="convertirADolares(this, 'resultado3')" step="0.01">
+        <p id="resultado3">-- Bs</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bs to USD Section -->
+  <div class="container">
+    <h3>De bol¨ªvares a d¨®lares</h3>
+    <div class="conversion-row">
+      <div class="conversion">
+        <input type="number" placeholder="Monto en bol¨ªvares" oninput="convertirABolivares(this, 'resultado4')" step="0.01">
+        <p id="resultado4">-- USD</p>
+      </div>
+      <div class="conversion">
+        <input type="number" placeholder="Monto en bol¨ªvares" oninput="convertirABolivares(this, 'resultado5')" step="0.01">
+        <p id="resultado5">-- USD</p>
+      </div>
+      <div class="conversion">
+        <input type="number" placeholder="Monto en bol¨ªvares" oninput="convertirABolivares(this, 'resultado6')" step="0.01">
+        <p id="resultado6">-- USD</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let tasa = 0;
+
+    // Obtener la tasa de cambio desde la API
+    async function obtenerTasa() {
+      try {
+        const respuesta = await fetch('https://pydolarve.org/api/v1/dollar?page=bcv&format_date=default&rounded_price=false');
+        const data = await respuesta.json();
+        tasa = Math.ceil(parseFloat(data.monitors.usd.price) + 1);
+        document.getElementById('tasa').innerText = tasa.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      } catch (error) {
+        document.getElementById('tasa').innerText = "Error al obtener tasa";
+        console.error("Error al obtener la tasa:", error);
+      }
+    }
+
+    obtenerTasa();
+
+    // Funciones para convertir monedas
+    function convertirADolares(input, resultadoId) {
+      if (tasa === 0) return;
+      const valor = parseFloat(input.value);
+      if (isNaN(valor)) {
+        document.getElementById(resultadoId).innerText = "-- Bs";
+      } else {
+        const resultado = valor * tasa;
+        document.getElementById(resultadoId).innerText = resultado.toFixed(2) + " Bs";
+      }
+    }
+
+    function convertirABolivares(input, resultadoId) {
+      if (tasa === 0) return;
+      const valor = parseFloat(input.value);
+      if (isNaN(valor)) {
+        document.getElementById(resultadoId).innerText = "-- USD";
+      } else {
+        const resultado = valor / tasa;
+        document.getElementById(resultadoId).innerText = resultado.toFixed(2) + " USD";
+      }
+    }
+
+    // Funci¨®n para obtener y aplicar el tema desde la cookie
+    function obtenerTemaDesdeCookie() {
+      const tema = document.cookie.replace(/(?:(?:^|.*;\s*)tema\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+      if (tema === "dark") {
+        document.body.classList.add('dark');
+        document.getElementById('theme-toggle').textContent = "??";
+      } else {
+        document.body.classList.remove('dark');
+        document.getElementById('theme-toggle').textContent = "??";
+      }
+    }
+
+    // Funci¨®n para guardar el tema en la cookie
+    function guardarTemaEnCookie(tema) {
+      document.cookie = `tema=${tema}; path=/; max-age=31536000`; // La cookie dura 1 a?o
+    }
+
+    // Tema claro/oscuro toggle
+    const toggleBtn = document.getElementById('theme-toggle');
+    toggleBtn.addEventListener('click', () => {
+      const isDark = document.body.classList.toggle('dark');
+      guardarTemaEnCookie(isDark ? 'dark' : 'light');
+      if (isDark) {
+        toggleBtn.textContent = "??"; // Cambio al icono de sol
+      } else {
+        toggleBtn.textContent = "??"; // Cambio al icono de luna
+      }
+    });
+
+    // Aplicar el tema guardado al cargar la p¨¢gina
+    obtenerTemaDesdeCookie();
+  </script>
+
+</body>
+</html>
