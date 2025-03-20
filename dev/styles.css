@@ -26,6 +26,10 @@ header {
   color: white;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
 }
 
 h1 {
@@ -33,9 +37,7 @@ h1 {
   font-size: 1.8rem;
 }
 
-#theme-toggle, #reset-btn {
-  position: absolute;
-  top: 20px;
+header button {
   background-color: white;
   color: var(--primary-color);
   border: none;
@@ -46,13 +48,16 @@ h1 {
   transition: background-color 0.3s;
 }
 
-#theme-toggle:hover, #reset-btn:hover {
+header button:hover {
   background-color: #eee;
 }
 
 .tasa {
   margin: 20px 0;
   font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .edit-btn {
@@ -60,6 +65,7 @@ h1 {
   border: none;
   cursor: pointer;
   font-size: 1.5rem;
+  color: var(--primary-color);
 }
 
 .container {
@@ -143,5 +149,10 @@ body.dark #reset-btn {
 
   .conversion {
     width: 90%;
+  }
+
+  header {
+    flex-direction: column;
+    gap: 10px;
   }
 }
