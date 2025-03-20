@@ -12,26 +12,28 @@
   <header>
     <h1>Calculadora Bs/USD</h1>
     <button id="theme-toggle">馃寵</button>
+    <button id="reset-btn">馃攧</button>
   </header>
 
   <div class="tasa">
     <p>Tasa actual: <strong><span id="tasa">Cargando...</span></strong> Bs/USD</p>
+    <button id="edit-tasa-btn" class="edit-btn">鉁忥笍</button>
   </div>
 
   <!-- USD to Bs Section -->
   <div class="container">
-    <h3>De dólares a bolívares</h3>
+    <h3>De d贸lares a bol铆vares</h3>
     <div class="conversion-row">
       <div class="conversion">
-        <input type="number" placeholder="Monto en dólares" oninput="convertirADolares(this, 'resultado1')" step="0.01">
+        <input type="number" placeholder="Monto en d贸lares" oninput="convertirADolares(this, 'resultado1')" step="0.01">
         <p id="resultado1">-- Bs</p>
       </div>
       <div class="conversion">
-        <input type="number" placeholder="Monto en dólares" oninput="convertirADolares(this, 'resultado2')" step="0.01">
+        <input type="number" placeholder="Monto en d贸lares" oninput="convertirADolares(this, 'resultado2')" step="0.01">
         <p id="resultado2">-- Bs</p>
       </div>
       <div class="conversion">
-        <input type="number" placeholder="Monto en dólares" oninput="convertirADolares(this, 'resultado3')" step="0.01">
+        <input type="number" placeholder="Monto en d贸lares" oninput="convertirADolares(this, 'resultado3')" step="0.01">
         <p id="resultado3">-- Bs</p>
       </div>
     </div>
@@ -39,18 +41,18 @@
 
   <!-- Bs to USD Section -->
   <div class="container">
-    <h3>De bolívares a dólares</h3>
+    <h3>De bol铆vares a d贸lares</h3>
     <div class="conversion-row">
       <div class="conversion">
-        <input type="number" placeholder="Monto en bolívares" oninput="convertirABolivares(this, 'resultado4')" step="0.01">
+        <input type="number" placeholder="Monto en bol铆vares" oninput="convertirABolivares(this, 'resultado4')" step="0.01">
         <p id="resultado4">-- USD</p>
       </div>
       <div class="conversion">
-        <input type="number" placeholder="Monto en bolívares" oninput="convertirABolivares(this, 'resultado5')" step="0.01">
+        <input type="number" placeholder="Monto en bol铆vares" oninput="convertirABolivares(this, 'resultado5')" step="0.01">
         <p id="resultado5">-- USD</p>
       </div>
       <div class="conversion">
-        <input type="number" placeholder="Monto en bolívares" oninput="convertirABolivares(this, 'resultado6')" step="0.01">
+        <input type="number" placeholder="Monto en bol铆vares" oninput="convertirABolivares(this, 'resultado6')" step="0.01">
         <p id="resultado6">-- USD</p>
       </div>
     </div>
@@ -59,7 +61,6 @@
   <script>
     let tasa = 0;
 
-    // Obtener la tasa de cambio desde la API
     async function obtenerTasa() {
       try {
         const respuesta = await fetch('https://pydolarve.org/api/v1/dollar?page=bcv&format_date=default&rounded_price=false');
@@ -74,7 +75,6 @@
 
     obtenerTasa();
 
-    // Funciones para convertir monedas
     function convertirADolares(input, resultadoId) {
       if (tasa === 0) return;
       const valor = parseFloat(input.value);
@@ -97,37 +97,33 @@
       }
     }
 
-    // Función para obtener y aplicar el tema desde la cookie
-    function obtenerTemaDesdeCookie() {
-      const tema = document.cookie.replace(/(?:(?:^|.*;\s*)tema\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-      if (tema === "dark") {
-        document.body.classList.add('dark');
-        document.getElementById('theme-toggle').textContent = "??";
-      } else {
-        document.body.classList.remove('dark');
-        document.getElementById('theme-toggle').textContent = "??";
-      }
-    }
-
-    // Función para guardar el tema en la cookie
-    function guardarTemaEnCookie(tema) {
-      document.cookie = `tema=${tema}; path=/; max-age=31536000`; // La cookie dura 1 a?o
-    }
-
     // Tema claro/oscuro toggle
     const toggleBtn = document.getElementById('theme-toggle');
     toggleBtn.addEventListener('click', () => {
-      const isDark = document.body.classList.toggle('dark');
-      guardarTemaEnCookie(isDark ? 'dark' : 'light');
-      if (isDark) {
-        toggleBtn.textContent = "??"; // Cambio al icono de sol
+      document.body.classList.toggle('dark');
+      if (document.body.classList.contains('dark')) {
+        toggleBtn.textContent = "馃尀";
       } else {
-        toggleBtn.textContent = "??"; // Cambio al icono de luna
+        toggleBtn.textContent = "馃寵";
       }
     });
 
-    // Aplicar el tema guardado al cargar la página
-    obtenerTemaDesdeCookie();
+    // Reset button functionality
+    const resetBtn = document.getElementById('reset-btn');
+    resetBtn.addEventListener('click', () => {
+      document.querySelectorAll('input').forEach(input => input.value = '');
+      document.querySelectorAll('p[id^="resultado"]').forEach(p => p.innerText = '-- Bs');
+    });
+
+    // Edit rate button functionality
+    const editTasaBtn = document.getElementById('edit-tasa-btn');
+    editTasaBtn.addEventListener('click', () => {
+      const nuevaTasa = prompt("Introduce la nueva tasa Bs/USD:", tasa);
+      if (nuevaTasa !== null && !isNaN(nuevaTasa)) {
+        tasa = parseFloat(nuevaTasa);
+        document.getElementById('tasa').innerText = tasa.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+    });
   </script>
 
 </body>
