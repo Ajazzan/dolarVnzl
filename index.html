@@ -1,92 +1,110 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calculadora Bs/USD</title>
-  <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=Ei0s3un949Vo&format=png&color=000000">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
+
+  <header>
+    <h1>Calculadora Bs/USD</h1>
+    <button id="theme-toggle">🌙</button>
+  </header>
+
+  <div class="tasa">
+    <p>Tasa actual: <strong><span id="tasa">Cargando...</span></strong> Bs/USD</p>
+  </div>
+
+  <!-- USD to Bs Section -->
   <div class="container">
-    <div class="theme-toggle">
-      <button id="themeToggleBtn">🌙</button>
-    </div>
-    <div class="exchange-rate">
-      <p>Tasa actual: <span id="tasa">24.50</span> Bs/USD
-        <button id="editarTasaBtn">
-          <img id="editarIcono" src="./logos/black-icons8-edit-24.png" alt="Editar" />
-        </button>
-      </p>
-    </div>
-    <div class="converter">
-      <div class="input-group">
-        <label for="bolivaresInput">Bolívares (Bs):</label>
-        <input type="number" id="bolivaresInput" placeholder="Ingrese monto en Bs">
-        <p>Equivale a: <span id="dolaresOutput">0</span> USD</p>
+    <h3>De dólares a bolívares</h3>
+    <div class="conversion-row">
+      <div class="conversion">
+        <input type="number" placeholder="Monto en dólares" oninput="convertirADolares(this, 'resultado1')" step="0.01">
+        <p id="resultado1">-- Bs</p>
       </div>
-      <div class="input-group">
-        <label for="dolaresInput">Dólares (USD):</label>
-        <input type="number" id="dolaresInput" placeholder="Ingrese monto en USD">
-        <p>Equivale a: <span id="bolivaresOutput">0</span> Bs</p>
+      <div class="conversion">
+        <input type="number" placeholder="Monto en dólares" oninput="convertirADolares(this, 'resultado2')" step="0.01">
+        <p id="resultado2">-- Bs</p>
+      </div>
+      <div class="conversion">
+        <input type="number" placeholder="Monto en dólares" oninput="convertirADolares(this, 'resultado3')" step="0.01">
+        <p id="resultado3">-- Bs</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bs to USD Section -->
+  <div class="container">
+    <h3>De bolívares a dólares</h3>
+    <div class="conversion-row">
+      <div class="conversion">
+        <input type="number" placeholder="Monto en bolívares" oninput="convertirABolivares(this, 'resultado4')" step="0.01">
+        <p id="resultado4">-- USD</p>
+      </div>
+      <div class="conversion">
+        <input type="number" placeholder="Monto en bolívares" oninput="convertirABolivares(this, 'resultado5')" step="0.01">
+        <p id="resultado5">-- USD</p>
+      </div>
+      <div class="conversion">
+        <input type="number" placeholder="Monto en bolívares" oninput="convertirABolivares(this, 'resultado6')" step="0.01">
+        <p id="resultado6">-- USD</p>
       </div>
     </div>
   </div>
 
   <script>
-    let tasa = 24.50; // Tasa inicial
-    const tasaSpan = document.getElementById('tasa');
-    const bolivaresInput = document.getElementById('bolivaresInput');
-    const dolaresInput = document.getElementById('dolaresInput');
-    const dolaresOutput = document.getElementById('dolaresOutput');
-    const bolivaresOutput = document.getElementById('bolivaresOutput');
-    const editarBtn = document.getElementById('editarTasaBtn');
-    const editarIcono = document.getElementById('editarIcono');
-    const themeToggleBtn = document.getElementById('themeToggleBtn');
-    let isDarkMode = false;
+    let tasa = 0;
 
-    // Función para actualizar las conversiones
-    function actualizarConversiones() {
-      const bolivares = parseFloat(bolivaresInput.value) || 0;
-      const dolares = parseFloat(dolaresInput.value) || 0;
-      dolaresOutput.textContent = (bolivares / tasa).toFixed(2);
-      bolivaresOutput.textContent = (dolares * tasa).toFixed(2);
+    async function obtenerTasa() {
+      try {
+        const respuesta = await fetch('https://pydolarve.org/api/v1/dollar?page=bcv&format_date=default&rounded_price=false');
+        const data = await respuesta.json();
+        tasa = Math.ceil(parseFloat(data.monitors.usd.price) + 1);
+        document.getElementById('tasa').innerText = tasa.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      } catch (error) {
+        document.getElementById('tasa').innerText = "Error al obtener tasa";
+        console.error("Error al obtener la tasa:", error);
+      }
     }
 
-    // Evento para editar la tasa
-    editarBtn.addEventListener('click', () => {
-      const nuevaTasa = prompt("Introduce la nueva tasa Bs/USD:", tasa);
-      if (nuevaTasa !== null && !isNaN(parseFloat(nuevaTasa))) {
-        tasa = parseFloat(nuevaTasa);
-        tasaSpan.textContent = tasa.toFixed(2);
-        actualizarConversiones();
+    obtenerTasa();
+
+    function convertirADolares(input, resultadoId) {
+      if (tasa === 0) return;
+      const valor = parseFloat(input.value);
+      if (isNaN(valor)) {
+        document.getElementById(resultadoId).innerText = "-- Bs";
+      } else {
+        const resultado = valor * tasa;
+        document.getElementById(resultadoId).innerText = resultado.toFixed(2) + " Bs";
+      }
+    }
+
+    function convertirABolivares(input, resultadoId) {
+      if (tasa === 0) return;
+      const valor = parseFloat(input.value);
+      if (isNaN(valor)) {
+        document.getElementById(resultadoId).innerText = "-- USD";
+      } else {
+        const resultado = valor / tasa;
+        document.getElementById(resultadoId).innerText = resultado.toFixed(2) + " USD";
+      }
+    }
+
+    // Tema claro/oscuro toggle
+    const toggleBtn = document.getElementById('theme-toggle');
+    toggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      if (document.body.classList.contains('dark')) {
+        toggleBtn.textContent = "☀️";
+      } else {
+        toggleBtn.textContent = "🌙";
       }
     });
-
-    // Eventos para actualizar conversiones al ingresar valores
-    bolivaresInput.addEventListener('input', () => {
-      dolaresInput.value = ''; // Limpiar el otro input
-      actualizarConversiones();
-    });
-
-    dolaresInput.addEventListener('input', () => {
-      bolivaresInput.value = ''; // Limpiar el otro input
-      actualizarConversiones();
-    });
-
-    // Función para cambiar el tema
-    function toggleTheme() {
-      isDarkMode = !isDarkMode;
-      document.body.classList.toggle('dark-mode', isDarkMode);
-      editarIcono.src = isDarkMode ? './logos/white-icons8-edit-24.png' : './logos/black-icons8-edit-24.png';
-      themeToggleBtn.textContent = isDarkMode ? '☀️' : '🌙';
-    }
-
-    // Evento para cambiar el tema
-    themeToggleBtn.addEventListener('click', toggleTheme);
   </script>
-</body>
 
+</body>
 </html>
