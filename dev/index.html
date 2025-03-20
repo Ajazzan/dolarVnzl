@@ -17,10 +17,9 @@
 
   <div class="tasa">
     <p>Tasa actual: <strong><span id="tasa">Cargando...</span></strong> Bs/USD</p>
-    <button id="edit-tasa-btn" class="edit-btn">✏️</button>
+    <button class="edit-btn" onclick="editarTasa()"><span id="edit-icon">✏️</span></button>
   </div>
 
-  <!-- USD to Bs Section -->
   <div class="container">
     <h3>De dólares a bolívares</h3>
     <div class="conversion-row">
@@ -39,7 +38,6 @@
     </div>
   </div>
 
-  <!-- Bs to USD Section -->
   <div class="container">
     <h3>De bolívares a dólares</h3>
     <div class="conversion-row">
@@ -97,33 +95,27 @@
       }
     }
 
-    // Tema claro/oscuro toggle
-    const toggleBtn = document.getElementById('theme-toggle');
-    toggleBtn.addEventListener('click', () => {
-      document.body.classList.toggle('dark');
-      if (document.body.classList.contains('dark')) {
-        toggleBtn.textContent = "🌞";
-      } else {
-        toggleBtn.textContent = "🌙";
-      }
-    });
-
-    // Reset button functionality
-    const resetBtn = document.getElementById('reset-btn');
-    resetBtn.addEventListener('click', () => {
-      document.querySelectorAll('input').forEach(input => input.value = '');
-      document.querySelectorAll('p[id^="resultado"]').forEach(p => p.innerText = '-- Bs');
-    });
-
-    // Edit rate button functionality
-    const editTasaBtn = document.getElementById('edit-tasa-btn');
-    editTasaBtn.addEventListener('click', () => {
-      const nuevaTasa = prompt("Introduce la nueva tasa Bs/USD:", tasa);
-      if (nuevaTasa !== null && !isNaN(nuevaTasa)) {
+    function editarTasa() {
+      const nuevaTasa = prompt("Introduce la nueva tasa de cambio Bs/USD:", tasa);
+      if (nuevaTasa && !isNaN(nuevaTasa)) {
         tasa = parseFloat(nuevaTasa);
         document.getElementById('tasa').innerText = tasa.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       }
+    }
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
     });
+
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      location.reload();
+    });
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark');
+    }
   </script>
 
 </body>
