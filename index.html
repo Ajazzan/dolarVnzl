@@ -10,6 +10,7 @@
 
   <header>
     <h1>Calculadora Bs/USD</h1>
+    <button id="theme-toggle">🌙</button>
   </header>
 
   <div class="tasa">
@@ -24,12 +25,10 @@
         <input type="number" placeholder="Monto en dólares" oninput="convertirADolares(this, 'resultado1')" step="0.01">
         <p id="resultado1">-- Bs</p>
       </div>
-
       <div class="conversion">
         <input type="number" placeholder="Monto en dólares" oninput="convertirADolares(this, 'resultado2')" step="0.01">
         <p id="resultado2">-- Bs</p>
       </div>
-
       <div class="conversion">
         <input type="number" placeholder="Monto en dólares" oninput="convertirADolares(this, 'resultado3')" step="0.01">
         <p id="resultado3">-- Bs</p>
@@ -45,12 +44,10 @@
         <input type="number" placeholder="Monto en bolívares" oninput="convertirABolivares(this, 'resultado4')" step="0.01">
         <p id="resultado4">-- USD</p>
       </div>
-
       <div class="conversion">
         <input type="number" placeholder="Monto en bolívares" oninput="convertirABolivares(this, 'resultado5')" step="0.01">
         <p id="resultado5">-- USD</p>
       </div>
-
       <div class="conversion">
         <input type="number" placeholder="Monto en bolívares" oninput="convertirABolivares(this, 'resultado6')" step="0.01">
         <p id="resultado6">-- USD</p>
@@ -96,6 +93,17 @@
         document.getElementById(resultadoId).innerText = resultado.toFixed(2) + " USD";
       }
     }
+
+    // Tema claro/oscuro toggle
+    const toggleBtn = document.getElementById('theme-toggle');
+    toggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      if (document.body.classList.contains('dark')) {
+        toggleBtn.textContent = "☀️";
+      } else {
+        toggleBtn.textContent = "🌙";
+      }
+    });
   </script>
 
 </body>
