@@ -19,43 +19,43 @@
   <!-- USD to Bs Section -->
   <div class="container">
     <h3>De dólares a bolívares</h3>
+    <div class="conversion-row">
+      <div class="conversion">
+        <input type="number" placeholder="Monto en dólares" oninput="convertirADolares(this, 'resultado1')" step="0.01">
+        <p id="resultado1">-- Bs</p>
+      </div>
 
-    <div class="conversion">
-      <input type="number" placeholder="Monto en dólares" oninput="convertirADolares(this, 'resultado1')" step="0.01">
-      <p id="resultado1">-- Bs</p>
+      <div class="conversion">
+        <input type="number" placeholder="Monto en dólares" oninput="convertirADolares(this, 'resultado2')" step="0.01">
+        <p id="resultado2">-- Bs</p>
+      </div>
+
+      <div class="conversion">
+        <input type="number" placeholder="Monto en dólares" oninput="convertirADolares(this, 'resultado3')" step="0.01">
+        <p id="resultado3">-- Bs</p>
+      </div>
     </div>
-
-    <div class="conversion">
-      <input type="number" placeholder="Monto en dólares" oninput="convertirADolares(this, 'resultado2')" step="0.01">
-      <p id="resultado2">-- Bs</p>
-    </div>
-
-    <div class="conversion">
-      <input type="number" placeholder="Monto en dólares" oninput="convertirADolares(this, 'resultado3')" step="0.01">
-      <p id="resultado3">-- Bs</p>
-    </div>
-
   </div>
 
   <!-- Bs to USD Section -->
   <div class="container">
     <h3>De bolívares a dólares</h3>
+    <div class="conversion-row">
+      <div class="conversion">
+        <input type="number" placeholder="Monto en bolívares" oninput="convertirABolivares(this, 'resultado4')" step="0.01">
+        <p id="resultado4">-- USD</p>
+      </div>
 
-    <div class="conversion">
-      <input type="number" placeholder="Monto en bolívares" oninput="convertirABolivares(this, 'resultado4')" step="0.01">
-      <p id="resultado4">-- USD</p>
+      <div class="conversion">
+        <input type="number" placeholder="Monto en bolívares" oninput="convertirABolivares(this, 'resultado5')" step="0.01">
+        <p id="resultado5">-- USD</p>
+      </div>
+
+      <div class="conversion">
+        <input type="number" placeholder="Monto en bolívares" oninput="convertirABolivares(this, 'resultado6')" step="0.01">
+        <p id="resultado6">-- USD</p>
+      </div>
     </div>
-
-    <div class="conversion">
-      <input type="number" placeholder="Monto en bolívares" oninput="convertirABolivares(this, 'resultado5')" step="0.01">
-      <p id="resultado5">-- USD</p>
-    </div>
-
-    <div class="conversion">
-      <input type="number" placeholder="Monto en bolívares" oninput="convertirABolivares(this, 'resultado6')" step="0.01">
-      <p id="resultado6">-- USD</p>
-    </div>
-
   </div>
 
   <script>
@@ -63,9 +63,7 @@
 
     async function obtenerTasa() {
       try {
-        const respuesta = await fetch('https://pydolarve.org/api/v1/dollar?page=bcv&format_date=default&rounded_price=false', {
-          headers: { 'Content-Type': 'application/json' }
-        });
+        const respuesta = await fetch('https://pydolarve.org/api/v1/dollar?page=bcv&format_date=default&rounded_price=false');
         const data = await respuesta.json();
         tasa = Math.ceil(parseFloat(data.monitors.usd.price) + 1);
         document.getElementById('tasa').innerText = tasa.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
