@@ -210,33 +210,36 @@
     }
 
     // Función genérica para realizar las conversiones
-    function convertir(input, resultadoId, aDolares) {
-        if (tasa === 0) return;
+    // Función genérica para realizar las conversiones
+function convertir(input, resultadoId, aDolares) {
+    if (tasa === 0) return;
 
-        let resultado = NaN;
-        const inputValue = input.value;
-        const incluyeOperadores = inputValue.includes('+') || inputValue.includes('-') || inputValue.includes('*') || inputValue.includes('/');
+    let resultado = NaN;
+    const inputValue = input.value;
+    const incluyeOperadores = inputValue.includes('+') || inputValue.includes('-') || inputValue.includes('*') || inputValue.includes('/');
 
-        if (incluyeOperadores) {
-            const valorEvaluado = evaluarExpresion(inputValue);
-            resultado = isNaN(valorEvaluado) ? 0 : (aDolares ? valorEvaluado * tasa : valorEvaluado / tasa);
+    if (incluyeOperadores) {
+        const valorEvaluado = evaluarExpresion(inputValue);
+        resultado = isNaN(valorEvaluado) ? 0 : (aDolares ? valorEvaluado * tasa : valorEvaluado / tasa);
+    } else {
+        const valor = obtenerValorNumerico(inputValue);
+        resultado = isNaN(valor) ? 0 : (aDolares ? valor * tasa : valor / tasa);
+    }
+
+    // Formato para mostrar resultado
+    const formatoResultado = isNaN(resultado) ? "-- " + (aDolares ? "Bs" : "USD") : resultado.toFixed(2) + " " + (aDolares ? "Bs" : "USD");
+    document.getElementById(resultadoId).innerText = formatoResultado;
+
+    if (aDolares) {
+        const cobrarId = resultadoId.replace('resultado', 'cobrar');
+        if (!isNaN(resultado)) {
+            // Mostrar el total en divisas junto con el monto en bolívares
+            document.getElementById(cobrarId).innerHTML = `A cobrar: ${Math.ceil(resultado)} Bs<br>(${(resultado / tasa).toFixed(2)} USD)`;
         } else {
-            const valor = obtenerValorNumerico(inputValue);
-            resultado = isNaN(valor) ? 0 : (aDolares ? valor * tasa : valor / tasa);
-        }
-
-        const formatoResultado = isNaN(resultado) ? "-- " + (aDolares ? "Bs" : "USD") : resultado.toFixed(2) + " " + (aDolares ? "Bs" : "USD");
-        document.getElementById(resultadoId).innerText = formatoResultado;
-
-        if (aDolares) {
-            const cobrarId = resultadoId.replace('resultado', 'cobrar');
-            if (!isNaN(resultado)) {
-                document.getElementById(cobrarId).innerText = "A cobrar: " + Math.ceil(resultado) + " Bs";
-            } else {
-                document.getElementById(cobrarId).innerText = "";
-            }
+            document.getElementById(cobrarId).innerText = "";
         }
     }
+}
 
     // Manejo del menú desplegable para la tasa
     document.getElementById('tasa-text').addEventListener('click', () => {
