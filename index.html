@@ -1,122 +1,273 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calculadora Bs/USD</title>
-  <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=Ei0s3un949Vo&format=png&color=000000">
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Bs/USD</title>
+    <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=Ei0s3un949Vo&format=png&color=000000">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <header>
+<header>
     <h1>Calculadora Bs/USD</h1>
     <button id="theme-toggle">🌙</button>
     <button id="reset-btn">🔄</button>
-  </header>
+</header>
 
-  <div class="tasa">
-    <p>Tasa actual: <strong><span id="tasa">Cargando...</span></strong> Bs/USD</p>
-    <button class="edit-btn" onclick="editarTasa()"><span id="edit-icon">✏️</span></button>
-  </div>
+<div class="tasa">
+    <p id="tasa-text">
+        Tasa actual: <strong><span id="tasa">Cargando...</span></strong> Bs/USD
+        <span class="dropdown-toggle">▼</span>
+    </p>
+    <!-- Menú desplegable personalizado -->
+    <div id="tasa-dropdown" class="dropdown hidden">
+        <div class="dropdown-item" data-value="bcv">BCV</div>
+        <div class="dropdown-item" data-value="tasa_corregida">Tasa Corregida</div>
+        <div class="dropdown-item" data-value="tasa_promedio">Tasa Promedio</div>
+        <div class="dropdown-item" data-value="tasa_promedio_doble">Tasa Promedio Doble</div>
+        <div class="dropdown-item" data-value="enparalelovzla">Tasa Paralela</div>
+    </div>
+</div>
 
-  <div class="container">
+<!-- Conversión de dólares a bolívares (5 inputs) -->
+<div class="container">
     <h3>De dólares a bolívares</h3>
     <div class="conversion-row">
-      <div class="conversion">
-        <input type="number" placeholder="Monto en dólares" oninput="convertirADolares(this, 'resultado1')" step="0.01">
-        <p id="resultado1">-- Bs</p>
-      </div>
-      <div class="conversion">
-        <input type="number" placeholder="Monto en dólares" oninput="convertirADolares(this, 'resultado2')" step="0.01">
-        <p id="resultado2">-- Bs</p>
-      </div>
-      <div class="conversion">
-        <input type="number" placeholder="Monto en dólares" oninput="convertirADolares(this, 'resultado3')" step="0.01">
-        <p id="resultado3">-- Bs</p>
-      </div>
+        <div class="conversion">
+            <input type="text" placeholder="Monto en dólares" oninput="convertir(this, 'resultado1', true)" step="0.01">
+            <p id="resultado1">-- Bs</p>
+            <p class="cobrar" id="cobrar1"></p>
+        </div>
+        <div class="conversion">
+            <input type="text" placeholder="Monto en dólares" oninput="convertir(this, 'resultado2', true)" step="0.01">
+            <p id="resultado2">-- Bs</p>
+            <p class="cobrar" id="cobrar2"></p>
+        </div>
+        <div class="conversion">
+            <input type="text" placeholder="Monto en dólares" oninput="convertir(this, 'resultado3', true)" step="0.01">
+            <p id="resultado3">-- Bs</p>
+            <p class="cobrar" id="cobrar3"></p>
+        </div>
+        <div class="conversion">
+            <input type="text" placeholder="Monto en dólares" oninput="convertir(this, 'resultado4', true)" step="0.01">
+            <p id="resultado4">-- Bs</p>
+            <p class="cobrar" id="cobrar4"></p>
+        </div>
+        <div class="conversion">
+            <input type="text" placeholder="Monto en dólares" oninput="convertir(this, 'resultado5', true)" step="0.01">
+            <p id="resultado5">-- Bs</p>
+            <p class="cobrar" id="cobrar5"></p>
+        </div>
     </div>
-  </div>
+</div>
 
-  <div class="container">
+<!-- Conversión de bolívares a dólares (5 inputs) -->
+<div class="container">
     <h3>De bolívares a dólares</h3>
     <div class="conversion-row">
-      <div class="conversion">
-        <input type="number" placeholder="Monto en bolívares" oninput="convertirABolivares(this, 'resultado4')" step="0.01">
-        <p id="resultado4">-- USD</p>
-      </div>
-      <div class="conversion">
-        <input type="number" placeholder="Monto en bolívares" oninput="convertirABolivares(this, 'resultado5')" step="0.01">
-        <p id="resultado5">-- USD</p>
-      </div>
-      <div class="conversion">
-        <input type="number" placeholder="Monto en bolívares" oninput="convertirABolivares(this, 'resultado6')" step="0.01">
-        <p id="resultado6">-- USD</p>
-      </div>
+        <div class="conversion">
+            <input type="text" placeholder="Monto en bolívares" oninput="convertir(this, 'resultado6', false)" step="0.01">
+            <p id="resultado6">-- USD</p>
+        </div>
+        <div class="conversion">
+            <input type="text" placeholder="Monto en bolívares" oninput="convertir(this, 'resultado7', false)" step="0.01">
+            <p id="resultado7">-- USD</p>
+        </div>
+        <div class="conversion">
+            <input type="text" placeholder="Monto en bolívares" oninput="convertir(this, 'resultado8', false)" step="0.01">
+            <p id="resultado8">-- USD</p>
+        </div>
+        <div class="conversion">
+            <input type="text" placeholder="Monto en bolívares" oninput="convertir(this, 'resultado9', false)" step="0.01">
+            <p id="resultado9">-- USD</p>
+        </div>
+        <div class="conversion">
+            <input type="text" placeholder="Monto en bolívares" oninput="convertir(this, 'resultado10', false)" step="0.01">
+            <p id="resultado10">-- USD</p>
+        </div>
     </div>
-  </div>
+</div>
 
-  <script>
+<script>
     let tasa = 0;
+    let tasaSeleccionada = localStorage.getItem('tasaSeleccionada') || "tasa_corregida";
+    let temaSeleccionado = localStorage.getItem('theme') || 'light'; // Recupera el tema seleccionado.
 
-    async function obtenerTasa() {
-      try {
-        const respuesta = await fetch('https://pydolarve.org/api/v1/dollar?page=bcv&format_date=default&rounded_price=false');
-        const data = await respuesta.json();
-        tasa = Math.ceil(parseFloat(data.monitors.usd.price) + 1);
-        document.getElementById('tasa').innerText = tasa.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-      } catch (error) {
-        document.getElementById('tasa').innerText = "Error al obtener tasa";
-        console.error("Error al obtener la tasa:", error);
-      }
+    // Asignar el tema seleccionado cuando se carga la página
+    document.body.classList.add(temaSeleccionado);
+    document.getElementById('theme-toggle').textContent = temaSeleccionado === 'dark' ? '☀️' : '🌙';
+
+    // Función para guardar la tasa seleccionada en localStorage
+    function guardarTasaSeleccionada(valor) {
+        localStorage.setItem('tasaSeleccionada', valor);
     }
 
-    obtenerTasa();
-
-    function convertirADolares(input, resultadoId) {
-      if (tasa === 0) return;
-      const valor = parseFloat(input.value);
-      if (isNaN(valor)) {
-        document.getElementById(resultadoId).innerText = "-- Bs";
-      } else {
-        const resultado = valor * tasa;
-        document.getElementById(resultadoId).innerText = resultado.toFixed(2) + " Bs";
-      }
+    // Funciones para obtener las tasas
+    async function obtenerTasaOficial() {
+        try {
+            const respuesta = await fetch('https://pydolarve.org/api/v1/dollar?page=bcv&format_date=default&rounded_price=false');
+            const data = await respuesta.json();
+            const oficial = parseFloat(data.monitors.usd.price);
+            if (isNaN(oficial)) throw new Error('Tasa oficial inválida');
+            return oficial;
+        } catch (error) {
+            console.error("Error al obtener la tasa oficial:", error);
+            mostrarError("No se pudo obtener la tasa oficial.");
+            return 0;
+        }
     }
 
-    function convertirABolivares(input, resultadoId) {
-      if (tasa === 0) return;
-      const valor = parseFloat(input.value);
-      if (isNaN(valor)) {
-        document.getElementById(resultadoId).innerText = "-- USD";
-      } else {
-        const resultado = valor / tasa;
-        document.getElementById(resultadoId).innerText = resultado.toFixed(2) + " USD";
-      }
+    async function obtenerTasaParalela() {
+        try {
+            const respuesta = await fetch('https://pydolarve.org/api/v1/dollar?page=alcambio&format_date=default&rounded_price=false');
+            const data = await respuesta.json();
+            const paralela = parseFloat(data.monitors.enparalelovzla.price);
+            if (isNaN(paralela)) throw new Error('Tasa paralela inválida');
+            return paralela;
+        } catch (error) {
+            console.error("Error al obtener la tasa paralela:", error);
+            mostrarError("No se pudo obtener la tasa paralela.");
+            return 0;
+        }
     }
 
-    function editarTasa() {
-      const nuevaTasa = prompt("Introduce la nueva tasa de cambio Bs/USD:", tasa);
-      if (nuevaTasa && !isNaN(nuevaTasa)) {
-        tasa = parseFloat(nuevaTasa);
-        document.getElementById('tasa').innerText = tasa.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-      }
+    async function obtenerTasaPromedio() {
+        const oficial = await obtenerTasaOficial();
+        const paralela = await obtenerTasaParalela();
+        return (oficial + paralela) / 2;
     }
 
+    async function obtenerTasaPromedioDoble() {
+        const promedio = await obtenerTasaPromedio();
+        const oficial = await obtenerTasaOficial();
+        return (promedio + oficial) / 2;
+    }
+
+    // Muestra un mensaje de error en la interfaz de usuario
+    function mostrarError(mensaje) {
+        alert(mensaje); // Puedes usar un elemento HTML en lugar de alert
+    }
+
+    // Actualiza la tasa según la opción seleccionada
+    async function actualizarTasa() {
+        switch (tasaSeleccionada) {
+            case "bcv":
+                tasa = await obtenerTasaOficial();
+                break;
+            case "tasa_corregida":
+                tasa = Math.ceil(await obtenerTasaOficial() + 1);
+                break;
+            case "tasa_promedio":
+                tasa = await obtenerTasaPromedio();
+                break;
+            case "tasa_promedio_doble":
+                tasa = await obtenerTasaPromedioDoble();
+                break;
+            case "enparalelovzla":
+                tasa = await obtenerTasaParalela();
+                break;
+            default:
+                tasa = await obtenerTasaOficial();
+                break;
+        }
+        if (!isNaN(tasa) && tasa !== 0) {
+            document.getElementById('tasa').innerText = tasa.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            //document.getElementById('tasa-text').innerHTML = `Tasa actual: <strong><span id="tasa">${tasa.toFixed(2)}</span></strong> Bs/USD <span class="dropdown-toggle">▼</span>`;
+        }
+    }
+
+    actualizarTasa();
+
+    // Función para obtener el valor numérico correctamente
+    function obtenerValorNumerico(valor) {
+        valor = valor.replace(',', '.');
+        if (isNaN(parseFloat(valor))) {
+            return NaN;
+        }
+        return parseFloat(valor);
+    }
+
+    function evaluarExpresion(expresion) {
+        // Reemplazar comas por puntos para unificar el formato decimal
+        expresion = expresion.replace(/,/g, '.');
+
+        // Validar que la expresión solo contenga números, operadores y paréntesis
+        const expresionValida = /^[0-9+\-*/().\s]*$/;
+
+        if (expresionValida.test(expresion)) {
+            try {
+                // Evaluar la expresión usando eval
+                return eval(expresion);
+            } catch (e) {
+                console.error("Expresión inválida:", expresion);
+                return NaN;
+            }
+        } else {
+            console.error("La expresión contiene caracteres no válidos:", expresion);
+            return NaN;
+        }
+    }
+
+    // Función genérica para realizar las conversiones
+    function convertir(input, resultadoId, aDolares) {
+        if (tasa === 0) return;
+
+        let resultado = NaN;
+        const inputValue = input.value;
+        const incluyeOperadores = inputValue.includes('+') || inputValue.includes('-') || inputValue.includes('*') || inputValue.includes('/');
+
+        if (incluyeOperadores) {
+            const valorEvaluado = evaluarExpresion(inputValue);
+            resultado = isNaN(valorEvaluado) ? 0 : (aDolares ? valorEvaluado * tasa : valorEvaluado / tasa);
+        } else {
+            const valor = obtenerValorNumerico(inputValue);
+            resultado = isNaN(valor) ? 0 : (aDolares ? valor * tasa : valor / tasa);
+        }
+
+        const formatoResultado = isNaN(resultado) ? "-- " + (aDolares ? "Bs" : "USD") : resultado.toFixed(2) + " " + (aDolares ? "Bs" : "USD");
+        document.getElementById(resultadoId).innerText = formatoResultado;
+
+        if (aDolares) {
+            const cobrarId = resultadoId.replace('resultado', 'cobrar');
+            if (!isNaN(resultado)) {
+                document.getElementById(cobrarId).innerText = "A cobrar: " + Math.ceil(resultado) + " Bs";
+            } else {
+                document.getElementById(cobrarId).innerText = "";
+            }
+        }
+    }
+
+    // Manejo del menú desplegable para la tasa
+    document.getElementById('tasa-text').addEventListener('click', () => {
+        document.getElementById('tasa-dropdown').classList.toggle('hidden');
+    });
+
+    document.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            tasaSeleccionada = e.target.dataset.value;
+            guardarTasaSeleccionada(tasaSeleccionada);
+            actualizarTasa();
+            document.getElementById('tasa-dropdown').classList.add('hidden');
+        });
+    });
+
+    // Funcionalidad para el tema
     document.getElementById('theme-toggle').addEventListener('click', () => {
-      document.body.classList.toggle('dark');
-      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        const currentTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.body.classList.remove(currentTheme);
+        document.body.classList.add(newTheme);
+
+        document.getElementById('theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        localStorage.setItem('theme', newTheme); // Guardar el tema en localStorage
     });
 
     document.getElementById('reset-btn').addEventListener('click', () => {
-      location.reload();
+        location.reload();
     });
 
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      document.body.classList.add('dark');
-    }
-  </script>
+</script>
 
 </body>
 </html>
