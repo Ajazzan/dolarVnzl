@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráficos de Tasas</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Análisis Histórico de Tasas</h1>
+        <button id="theme-toggle">🌙</button>
+        <button id="reset-btn">🔄</button>
+    </header>
+
+    <div class="container">
+        <h3>Evolución de Tasas (Últimos 30 días)</h3>
+        <div class="chart-container">
+            <canvas id="historicoChart"></canvas>
+        </div>
+    </div>
+
+    <div class="container">
+        <h3>Brecha Porcentual vs BCV</h3>
+        <div class="chart-container">
+            <canvas id="brechaChart"></canvas>
+        </div>
+    </div>
+
+    <div class="loading">Cargando datos...</div>
+
+    <!-- Botón para calculadora -->
+<div class="nav-container">
+    <a href="index.html" class="nav-button">← Volver a Calculadora</a>
+</div>
+
+<script>
+// ======= Configuración Común =======
+const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: { position: 'top' }
+    }
+};
+
+// ======= Tema y Configuración UI =======
+let temaActual = localStorage.getItem('theme') || 'light';
+document.body.classList.add(temaActual);
+document.getElementById('theme-toggle').textContent = temaActual === 'dark' ? '☀️' : '🌙';
+
+document.getElementById('theme-toggle').addEventListener('click', () => {
+    temaActual = temaActual === 'dark' ? 'light' : 'dark';
+    document.body.classList.toggle('dark');
+    document.getElementById('theme-toggle').textContent = temaActual === 'dark' ? '☀️' : '🌙';
+    localStorage.setItem('theme', temaActual);
+    actualizarTemaGraficos();
+});
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+    location.reload();
+});
+
+// ======= Lógica de Gráficos =======
+let historicoChart, brechaChart;
+
+async function cargarDatos() {
+    try {
+        const response = await fetch('https://2be1c9d8-141e-401a-b78a-2642888635c0-00-cofdyubkl50r.worf.replit.dev/api/tasas');
+        const todasTasas = await response.json();
+        const tasas = todasTasas.slice(-30);
+        
+        crearGraficos(tasas);
+        document.querySelector('.loading').style.display = 'none';
+        
+    } catch (error) {
+        console.error('Error:', error);
+        document.querySelector('.loading').textContent = 'Error cargando datos';
+    }
+}
+
+function crearGraficos(tasas) {
+    const fechas = tasas.map(t => t.fecha.split(',')[0]);
+    
+    // Gráfico histórico
+    historicoChart = new Chart(document.getElementById('historicoChart'), {
+        type: 'line',
+        data: {
+            labels: fechas,
+            datasets: [
+                crearDataset('BCV', tasas.map(t => t.bcv), '#3498db'),
+                crearDataset('Paralela', tasas.map(t => t.paralela), '#e74c3c'),
+                crearDataset('Tasa Corregida', tasas.map(t => t.tasa_corregida), '#2ecc71'),
+                crearDataset('Tasa Promedio', tasas.map(t => t.tasa_promedio), '#f1c40f')
+            ]
+        },
+        options: chartOptions
+    });
+
+    // Gráfico de brecha
+    brechaChart = new Chart(document.getElementById('brechaChart'), {
+        type: 'bar',
+        data: {
+            labels: fechas,
+            datasets: [
+                crearDatasetBar('Paralela vs BCV', tasas.map(t => ((t.paralela - t.bcv)/t.bcv * 100).toFixed(2)), '#e74c3c'),
+                crearDatasetBar('Corregida vs BCV', tasas.map(t => ((t.tasa_corregida - t.bcv)/t.bcv * 100).toFixed(2)), '#2ecc71'),
+                crearDatasetBar('Promedio vs BCV', tasas.map(t => ((t.tasa_promedio - t.bcv)/t.bcv * 100).toFixed(2)), '#f1c40f')
+            ]
+        },
+        options: chartOptions
+    });
+}
+
+function crearDataset(label, data, color) {
+    return {
+        label: label,
+        data: data,
+        borderColor: color,
+        backgroundColor: color + '33',
+        tension: 0.3,
+        fill: false
+    };
+}
+
+function crearDatasetBar(label, data, color) {
+    return {
+        label: label,
+        data: data,
+        backgroundColor: color,
+        borderColor: color,
+        borderWidth: 1
+    };
+}
+
+function actualizarTemaGraficos() {
+    const options = {
+        color: temaActual === 'dark' ? '#fff' : '#666',
+        gridColor: temaActual === 'dark' ? '#ffffff33' : '#00000033'
+    };
+
+    [historicoChart, brechaChart].forEach(chart => {
+        chart.options.scales.x.ticks.color = options.color;
+        chart.options.scales.y.ticks.color = options.color;
+        chart.options.plugins.legend.labels.color = options.color;
+        chart.update();
+    });
+}
+
+// Iniciar
+document.addEventListener('DOMContentLoaded', cargarDatos);
+</script>
+</body>
+</html>
