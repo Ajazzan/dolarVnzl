@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráficos de Tasas</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Análisis Histórico de Tasas</h1>
+        <button id="theme-toggle">🌙</button>
+        <button id="reset-btn">🔄</button>
+    </header>
+
+    <div class="container">
+        <div class="chart-header">
+            <h3>
+                Evolución de Tasas
+                <div class="date-buttons">
+                    <button data-dias="30" class="date-button active">30D</button>
+                    <button data-dias="14" class="date-button">14D</button>
+                    <button data-dias="7" class="date-button">7D</button>
+                    <span id="tendencia-bcv"></span>
+                    <span id="tendencia-paralela"></span>
+                </div>
+            </h3>
+        </div>
+        <div class="chart-container">
+            <canvas id="historicoChart"></canvas>
+        </div>
+    </div>
+
+    <div class="container">
+        <h3>Brecha Porcentual vs BCV</h3>
+        <div class="chart-container">
+            <canvas id="brechaChart"></canvas>
+        </div>
+    </div>
+
+    <div class="loading">Cargando datos...</div>
+
+    <!-- Botón para calculadora -->
+    <div class="nav-container">
+        <a href="index.html" class="nav-button">← Volver a Calculadora</a>
+    </div>
+
+    <script>
+        // ======= Configuración Común =======
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top' }
+            },
+        };
+        
+        // ======= Tema y Configuración UI =======
+        let temaActual = localStorage.getItem('theme') || 'light';
+        document.body.classList.add(temaActual);
+        document.getElementById('theme-toggle').textContent = temaActual === 'dark' ? '☀️' : '🌙';
+        
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            temaActual = temaActual === 'dark' ? 'light' : 'dark';
+            document.body.classList.toggle('dark');
+            document.getElementById('theme-toggle').textContent = temaActual === 'dark' ? '☀️' : '🌙';
+            localStorage.setItem('theme', temaActual);
+            actualizarTemaGraficos();
+        });
+        
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            location.reload();
+        });
+        
+        // ======= Lógica de Gráficos Mejorada =======
+        let historicoChart, brechaChart;
+        let todasTasasGlobal = []; // Variable global para almacenar todas las tasas
+
+        async function cargarDatos() {
+            try {
+                const response = await fetch('https://2be1c9d8-141e-401a-b78a-2642888635c0-00-cofdyubkl50r.worf.replit.dev/api/tasas');
+                const todasTasas = await response.json();
+                todasTasasGlobal = todasTasas; // Almacenar en la variable global
+                
+                procesarYMostrarGraficos(30); // Cargar con 30 días por defecto
+                document.querySelector('.loading').style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.querySelector('.loading').textContent = 'Error cargando datos';
+            }
+        }
+        
+        function procesarYMostrarGraficos(dias) {
+            const todasTasas = todasTasasGlobal; // Usar datos almacenados
+            
+            // Procesamiento mejorado de fechas
+            const tasasProcesadas = todasTasas.map(t => {
+                let fechaISO;
+                try {
+                    // Convertir ambos formatos de fecha a objeto Date
+                    const [fechaStr, horaStr] = t.fecha.split(', ').map(s => s.trim());
+                    const [dia, mes, año] = fechaStr.split('/');
+                    
+                    // Procesar hora con formato 12h/24h
+                    let [hora, minuto, segundo] = horaStr.replace(' p. m.', '')
+                        .replace(' a. m.', '')
+                        .split(':')
+                        .map(Number);
+                    
+                    // Convertir formato 12h a 24h
+                    if (horaStr.includes('p. m.') && hora < 12) hora += 12;
+                    if (horaStr.includes('a. m.') && hora === 12) hora = 0;
+                    
+                    fechaISO = new Date(año, mes - 1, dia, hora, minuto || 0, segundo || 0);
+                    
+                    return {
+                        ...t,
+                        fechaObj: fechaISO,
+                        fechaKey: fechaISO.toISOString().split('T')[0]
+                    };
+                } catch (e) {
+                    console.error('Error procesando fecha:', t.fecha);
+                    return null;
+                }
+            }).filter(t => t !== null);
+            
+            // Ordenar de más antiguo a más nuevo
+            const tasasOrdenadas = tasasProcesadas.sort((a, b) => a.fechaObj - b.fechaObj);
+            
+            // Eliminar duplicados manteniendo el registro más reciente por fechaKey
+            const tasasUnicas = Object.values(tasasOrdenadas.reduce((acc, t) => {
+                if (!acc[t.fechaKey] || t.fechaObj > acc[t.fechaKey].fechaObj) {
+                    acc[t.fechaKey] = t;
+                }
+                return acc;
+            }, {}));
+            
+            // Tomar últimos N días (ya están ordenados cronológicamente)
+            const ultimasTasas = tasasUnicas.slice(-dias);
+            
+            crearGraficos(ultimasTasas);
+            actualizarTendencia(ultimasTasas);
+        }
+        
+        function crearGraficos(tasas) {
+            // Formatear fechas para visualización
+            const fechas = tasas.map(t => 
+                t.fechaObj.toLocaleDateString('es-VE', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                })
+            );
+            
+            // Destruir gráficos anteriores si existen
+            if (historicoChart) historicoChart.destroy();
+            if (brechaChart) brechaChart.destroy();
+            
+            // Gráfico histórico
+            historicoChart = new Chart(document.getElementById('historicoChart'), {
+                type: 'line',
+                data: {
+                    labels: fechas,
+                    datasets: [
+                        crearDataset('BCV', tasas.map(t => t.bcv), '#3498db'),
+                        crearDataset('Paralela', tasas.map(t => t.paralela), '#e74c3c'),
+                        crearDataset('Tasa Corregida', tasas.map(t => t.tasa_corregida), '#2ecc71'),
+                        crearDataset('Tasa Promedio', tasas.map(t => t.tasa_promedio), '#f1c40f')
+                    ]
+                },
+                options: {
+                    ...chartOptions,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Fecha'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Valor (Bs)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Gráfico de brecha
+            brechaChart = new Chart(document.getElementById('brechaChart'), {
+                type: 'bar',
+                data: {
+                    labels: fechas,
+                    datasets: [
+                        crearDatasetBar('Paralela vs BCV', tasas.map(t => ((t.paralela - t.bcv)/t.bcv * 100).toFixed(2)), '#e74c3c'),
+                        crearDatasetBar('Corregida vs BCV', tasas.map(t => ((t.tasa_corregida - t.bcv)/t.bcv * 100).toFixed(2)), '#2ecc71'),
+                        crearDatasetBar('Promedio vs BCV', tasas.map(t => ((t.tasa_promedio - t.bcv)/t.bcv * 100).toFixed(2)), '#f1c40f')
+                    ]
+                },
+                options: {
+                    ...chartOptions,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Fecha'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Porcentaje (%)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function crearDataset(label, data, color) {
+            return {
+                label: label,
+                data: data,
+                borderColor: color,
+                backgroundColor: color + '33',
+                tension: 0.3,
+                fill: false
+            };
+        }
+        
+        function crearDatasetBar(label, data, color) {
+            return {
+                label: label,
+                data: data,
+                backgroundColor: color + 'CC',
+                borderColor: color,
+                borderWidth: 1,
+                borderRadius: 4
+            };
+        }
+        
+        function actualizarTemaGraficos() {
+            const textColor = temaActual === 'dark' ? '#fff' : '#666';
+            const gridColor = temaActual === 'dark' ? '#ffffff33' : '#00000033';
+            
+            [historicoChart, brechaChart].forEach(chart => {
+                chart.options.scales.x.ticks.color = textColor;
+                chart.options.scales.y.ticks.color = textColor;
+                chart.options.scales.x.grid.color = gridColor;
+                chart.options.scales.y.grid.color = gridColor;
+                chart.options.plugins.legend.labels.color = textColor;
+                chart.update();
+            });
+        }
+
+       function actualizarTendencia(tasas) {
+            if (tasas.length < 2) {
+                document.getElementById('tendencia-bcv').textContent = 'No hay suficientes datos';
+                document.getElementById('tendencia-bcv').style.color = 'gray';
+                document.getElementById('tendencia-paralela').textContent = ''; // Limpiar el texto de tendencia paralela
+                return;
+            }
+
+            // Tendencia BCV
+            const ultimoValorBCV = tasas[tasas.length - 1].bcv;
+            const primerValorBCV = tasas[0].bcv;
+            const diferenciaBCV = ultimoValorBCV - primerValorBCV;
+            const porcentajeCambioBCV = ((diferenciaBCV / primerValorBCV) * 100).toFixed(2);
+            const tendenciaElementBCV = document.getElementById('tendencia-bcv');
+
+            let emojiBCV = '';
+            if (diferenciaBCV > 0) {
+                emojiBCV = '▲';
+                tendenciaElementBCV.style.color = '#d84040';
+            } else if (diferenciaBCV < 0) {
+                emojiBCV = '▼';
+                tendenciaElementBCV.style.color = 'green';
+            } else {
+                emojiBCV = '';
+                tendenciaElementBCV.style.color = 'gray';
+            }
+
+            tendenciaElementBCV.textContent = `${emojiBCV} ${diferenciaBCV === 0 ? 'Sin cambios' : porcentajeCambioBCV + '%'} BCV`;
+
+            // Tendencia Paralela
+            const ultimoValorParalela = tasas[tasas.length - 1].paralela;
+            const primerValorParalela = tasas[0].paralela;
+            const diferenciaParalela = ultimoValorParalela - primerValorParalela;
+            const porcentajeCambioParalela = ((diferenciaParalela / primerValorParalela) * 100).toFixed(2);
+            const tendenciaElementParalela = document.getElementById('tendencia-paralela');
+
+            let emojiParalela = '';
+            if (diferenciaParalela > 0) {
+                emojiParalela = '▲';
+                tendenciaElementParalela.style.color = '#d84040';
+            } else if (diferenciaParalela < 0) {
+                emojiParalela = '▼';
+                tendenciaElementParalela.style.color = 'green';
+            } else {
+                emojiParalela = '';
+                tendenciaElementParalela.style.color = 'gray';
+            }
+
+            tendenciaElementParalela.textContent = `${emojiParalela} ${diferenciaParalela === 0 ? 'Sin cambios' : porcentajeCambioParalela + '%'} Paralelo`;
+        }
+        
+        // Event listeners para los botones de rango de fechas
+        const botonesRango = document.querySelectorAll('.date-button');
+        botonesRango.forEach(boton => {
+            boton.addEventListener('click', function() {
+                const dias = parseInt(this.dataset.dias);
+                
+                // Remover clase 'active' de todos los botones
+                botonesRango.forEach(btn => btn.classList.remove('active'));
+                
+                // Agregar clase 'active' al botón clickeado
+                this.classList.add('active');
+                
+                procesarYMostrarGraficos(dias);
+            });
+        });
+        
+        // Iniciar
+        document.addEventListener('DOMContentLoaded', cargarDatos);
+    </script>
+</body>
+</html>
