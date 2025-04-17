@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Brecha Cambiaria</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Calculadora de Brecha Cambiaria</h1>
+        <button id="theme-toggle">🌙</button>
+        <button id="reset-btn">🔄</button>
+        <div class="nav-buttons">
+            <a href="index.html" class="nav-button">Calculadora</a>
+            <a href="graficos.html" class="nav-button">Gráficos</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <h3>Calcula la Brecha Cambiaria</h3>
+
+        <div class="conversion-row">
+            <div class="conversion">
+                <p>Dólares a comprar (Paralelo)</p>
+                <input type="number" id="dolares-paralelo" placeholder="Ingrese la cantidad">
+            </div>
+            <div class="conversion">
+                <p>Tasa Paralelo (Bs/USD)</p>
+                <input type="number" id="tasa-paralelo" placeholder="Tasa" readonly>
+            </div>
+            <div class="conversion">
+                <p>Bolívares Necesarios (Paralelo)</p>
+                <p id="bolivares-necesarios">0.00 Bs</p>
+            </div>
+        </div>
+
+        <div class="conversion-row">
+            <div class="conversion">
+                <p>Tasa BCV (Bs/USD)</p>
+                <input type="number" id="tasa-bcv" placeholder="Tasa" readonly>
+            </div>
+            <div class="conversion">
+                <p>Declaración BCV (USD)</p>
+                <p id="declaracion-bcv">0.00 USD</p>
+            </div>
+            <div class="conversion">
+                <p>Brecha Cambiaria (%)</p>
+                <p id="brecha-porcentaje">0.00%</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botón para gráficos -->
+    <div class="nav-container">
+        <a href="graficos.html" class="nav-button">Ver Gráficos Históricos →</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Elementos del DOM
+            const dolaresParaleloInput = document.getElementById('dolares-paralelo');
+            const tasaParaleloInput = document.getElementById('tasa-paralelo');
+            const bolivaresNecesariosP = document.getElementById('bolivares-necesarios');
+            const tasaBCVInput = document.getElementById('tasa-bcv');
+            const declaracionBCVP = document.getElementById('declaracion-bcv');
+            const brechaPorcentajeP = document.getElementById('brecha-porcentaje');
+            const themeToggle = document.getElementById('theme-toggle');
+            
+            // Función para obtener las tasas
+            async function getTasas() {
+                try {
+                    const response = await fetch('https://2be1c9d8-141e-401a-b78a-2642888635c0-00-cofdyubkl50r.worf.replit.dev/api/tasas');
+                    const data = await response.json();
+                    const ultimaTasa = data[0]; // Tomar la última tasa
+                    
+                    tasaParaleloInput.value = ultimaTasa.paralela;
+                    tasaBCVInput.value = ultimaTasa.bcv;
+                    
+                    calcularBrecha();
+                } catch (error) {
+                    console.error('Error al obtener las tasas:', error);
+                    tasaParaleloInput.value = 'Error';
+                    tasaBCVInput.value = 'Error';
+                }
+            }
+            
+            // Función para calcular la brecha
+            function calcularBrecha() {
+                const dolares = parseFloat(dolaresParaleloInput.value) || 0;
+                const tasaParalelo = parseFloat(tasaParaleloInput.value) || 0;
+                const tasaBCV = parseFloat(tasaBCVInput.value) || 0;
+                
+                const bolivaresNecesarios = dolares * tasaParalelo;
+                bolivaresNecesariosP.textContent = bolivaresNecesarios.toFixed(2) + ' Bs';
+                
+                const declaracionBCV = bolivaresNecesarios / tasaBCV;
+                declaracionBCVP.textContent = declaracionBCV.toFixed(2) + ' USD';
+                
+                const brechaPorcentaje = ((tasaParalelo - tasaBCV) / tasaBCV) * 100;
+                brechaPorcentajeP.textContent = brechaPorcentaje.toFixed(2) + '%';
+            }
+            
+            // Event listeners
+            dolaresParaleloInput.addEventListener('input', calcularBrecha);
+            
+            // Obtener tasas iniciales
+            getTasas();
+
+             // Theme functionality
+            const temaActual = localStorage.getItem('theme') || 'light';
+            document.body.classList.add(temaActual);
+            themeToggle.textContent = temaActual === 'dark' ? '☀️' : '🌙';
+
+            themeToggle.addEventListener('click', () => {
+                const nuevoTema = document.body.classList.contains('dark') ? 'light' : 'dark';
+                document.body.classList.toggle('dark');
+                themeToggle.textContent = nuevoTema === 'dark' ? '☀️' : '🌙';
+                localStorage.setItem('theme', nuevoTema);
+            });
+        });
+
+    document.getElementById('reset-btn').addEventListener('click', () => {
+        location.reload();
+    });
+    </script>
+</body>
+</html>

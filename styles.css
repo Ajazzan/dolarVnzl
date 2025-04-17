@@ -359,3 +359,31 @@ body.dark .nav-button:hover {
   margin-left: 10px;
   font-size: 1.1rem;
 }
+
+.nav-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.nav-buttons .nav-button {
+  background-color: white;
+  color: var(--primary-color);
+  padding: 8px 12px;
+  border-radius: 20px;
+  text-decoration: none;
+  transition: background-color 0.3s;
+  border: 2px solid transparent;
+}
+
+.nav-buttons .nav-button:hover {
+  background-color: #eee;
+}
+
+body.dark .nav-buttons .nav-button {
+  background-color: #2c3e50;
+  color: white;
+}
+
+body.dark .nav-buttons .nav-button:hover {
+  background-color: #34495e;
+}

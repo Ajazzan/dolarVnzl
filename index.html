@@ -13,6 +13,10 @@
     <h1>Calculadora Bs/USD</h1>
     <button id="theme-toggle">🌙</button>
     <button id="reset-btn">🔄</button>
+    <div class="nav-buttons">
+        <a href="graficos.html" class="nav-button">Ver Gráficos</a>
+        <a href="brecha.html" class="nav-button">Calcular Brecha</a>
+    </div>
 </header>
 
 <div class="tasa">
@@ -20,17 +24,25 @@
         Tasa actual: <strong><span id="tasa">Cargando...</span></strong> Bs/USD
         <span class="dropdown-toggle">▼</span>
     </p>
-    <!-- Menú desplegable personalizado -->
     <div id="tasa-dropdown" class="dropdown hidden">
-        <div class="dropdown-item" data-value="bcv">BCV</div>
-        <div class="dropdown-item" data-value="tasa_corregida">Tasa Corregida</div>
-        <div class="dropdown-item" data-value="tasa_promedio">Tasa Promedio</div>
-        <div class="dropdown-item" data-value="tasa_promedio_doble">Tasa Promedio Doble</div>
-        <div class="dropdown-item" data-value="enparalelovzla">Tasa Paralela</div>
+        <div class="dropdown-item" data-value="bcv" data-tooltip="Tasa oficial del Banco Central de Venezuela">
+            BCV <span class="check">✓</span>
+        </div>
+        <div class="dropdown-item" data-value="tasa_corregida" data-tooltip="Tasa oficial + 1.75% (para prevenir ante subidas)">
+            Tasa Corregida <span class="check">✓</span>
+        </div>
+        <div class="dropdown-item" data-value="tasa_promedio" data-tooltip="Promedio entre tasa oficial y paralela">
+            Tasa Promedio <span class="check">✓</span>
+        </div>
+        <div class="dropdown-item" data-value="tasa_promedio_doble" data-tooltip="Promedio entre tasa promedio y oficial">
+            Tasa Promedio Doble <span class="check">✓</span>
+        </div>
+        <div class="dropdown-item" data-value="enparalelovzla" data-tooltip="Tasa del mercado paralelo (EnParaleloVzla)">
+            Tasa Paralela <span class="check">✓</span>
+        </div>
     </div>
 </div>
 
-<!-- Conversión de dólares a bolívares (5 inputs) -->
 <div class="container">
     <h3>De dólares a bolívares</h3>
     <div class="conversion-row">
@@ -62,7 +74,6 @@
     </div>
 </div>
 
-<!-- Conversión de bolívares a dólares (5 inputs) -->
 <div class="container">
     <h3>De bolívares a dólares</h3>
     <div class="conversion-row">
@@ -89,21 +100,23 @@
     </div>
 </div>
 
+<!-- Botón para gráficos -->
+<div class="nav-container">
+    <a href="graficos" class="nav-button">Ver Gráficos Históricos →</a>
+</div>
+
 <script>
     let tasa = 0;
-    let tasaSeleccionada = localStorage.getItem('tasaSeleccionada') || "tasa_corregida";
-    let temaSeleccionado = localStorage.getItem('theme') || 'light'; // Recupera el tema seleccionado.
+    let tasaSeleccionada = localStorage.getItem('tasaSeleccionada') || "bcv";
+    let temaSeleccionado = localStorage.getItem('theme') || 'light';
 
-    // Asignar el tema seleccionado cuando se carga la página
     document.body.classList.add(temaSeleccionado);
     document.getElementById('theme-toggle').textContent = temaSeleccionado === 'dark' ? '☀️' : '🌙';
 
-    // Función para guardar la tasa seleccionada en localStorage
     function guardarTasaSeleccionada(valor) {
         localStorage.setItem('tasaSeleccionada', valor);
     }
 
-    // Funciones para obtener las tasas
     async function obtenerTasaOficial() {
         try {
             const respuesta = await fetch('https://pydolarve.org/api/v1/dollar?page=bcv&format_date=default&rounded_price=false');
@@ -144,19 +157,17 @@
         return (promedio + oficial) / 2;
     }
 
-    // Muestra un mensaje de error en la interfaz de usuario
     function mostrarError(mensaje) {
-        alert(mensaje); // Puedes usar un elemento HTML en lugar de alert
+        alert(mensaje);
     }
 
-    // Actualiza la tasa según la opción seleccionada
     async function actualizarTasa() {
         switch (tasaSeleccionada) {
             case "bcv":
                 tasa = await obtenerTasaOficial();
                 break;
             case "tasa_corregida":
-                tasa = Math.ceil(await obtenerTasaOficial() + 1);
+                tasa = Math.ceil(await obtenerTasaOficial() + (await obtenerTasaOficial() * 0.0175));
                 break;
             case "tasa_promedio":
                 tasa = await obtenerTasaPromedio();
@@ -173,13 +184,11 @@
         }
         if (!isNaN(tasa) && tasa !== 0) {
             document.getElementById('tasa').innerText = tasa.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-            //document.getElementById('tasa-text').innerHTML = `Tasa actual: <strong><span id="tasa">${tasa.toFixed(2)}</span></strong> Bs/USD <span class="dropdown-toggle">▼</span>`;
         }
     }
 
     actualizarTasa();
 
-    // Función para obtener el valor numérico correctamente
     function obtenerValorNumerico(valor) {
         valor = valor.replace(',', '.');
         if (isNaN(parseFloat(valor))) {
@@ -189,15 +198,10 @@
     }
 
     function evaluarExpresion(expresion) {
-        // Reemplazar comas por puntos para unificar el formato decimal
         expresion = expresion.replace(/,/g, '.');
-
-        // Validar que la expresión solo contenga números, operadores y paréntesis
         const expresionValida = /^[0-9+\-*/().\s]*$/;
-
         if (expresionValida.test(expresion)) {
             try {
-                // Evaluar la expresión usando eval
                 return eval(expresion);
             } catch (e) {
                 console.error("Expresión inválida:", expresion);
@@ -209,39 +213,34 @@
         }
     }
 
-    // Función genérica para realizar las conversiones
-    // Función genérica para realizar las conversiones
-function convertir(input, resultadoId, aDolares) {
-    if (tasa === 0) return;
+    function convertir(input, resultadoId, aDolares) {
+        if (tasa === 0) return;
 
-    let resultado = NaN;
-    const inputValue = input.value;
-    const incluyeOperadores = inputValue.includes('+') || inputValue.includes('-') || inputValue.includes('*') || inputValue.includes('/');
+        let resultado = NaN;
+        const inputValue = input.value;
+        const incluyeOperadores = inputValue.includes('+') || inputValue.includes('-') || inputValue.includes('*') || inputValue.includes('/');
 
-    if (incluyeOperadores) {
-        const valorEvaluado = evaluarExpresion(inputValue);
-        resultado = isNaN(valorEvaluado) ? 0 : (aDolares ? valorEvaluado * tasa : valorEvaluado / tasa);
-    } else {
-        const valor = obtenerValorNumerico(inputValue);
-        resultado = isNaN(valor) ? 0 : (aDolares ? valor * tasa : valor / tasa);
-    }
-
-    // Formato para mostrar resultado
-    const formatoResultado = isNaN(resultado) ? "-- " + (aDolares ? "Bs" : "USD") : resultado.toFixed(2) + " " + (aDolares ? "Bs" : "USD");
-    document.getElementById(resultadoId).innerText = formatoResultado;
-
-    if (aDolares) {
-        const cobrarId = resultadoId.replace('resultado', 'cobrar');
-        if (!isNaN(resultado)) {
-            // Mostrar el total en divisas junto con el monto en bolívares
-            document.getElementById(cobrarId).innerHTML = `A cobrar: ${Math.ceil(resultado)} Bs<br>(${(resultado / tasa).toFixed(2)} USD)`;
+        if (incluyeOperadores) {
+            const valorEvaluado = evaluarExpresion(inputValue);
+            resultado = isNaN(valorEvaluado) ? 0 : (aDolares ? valorEvaluado * tasa : valorEvaluado / tasa);
         } else {
-            document.getElementById(cobrarId).innerText = "";
+            const valor = obtenerValorNumerico(inputValue);
+            resultado = isNaN(valor) ? 0 : (aDolares ? valor * tasa : valor / tasa);
+        }
+
+        const formatoResultado = isNaN(resultado) ? "-- " + (aDolares ? "Bs" : "USD") : resultado.toFixed(2) + " " + (aDolares ? "Bs" : "USD");
+        document.getElementById(resultadoId).innerText = formatoResultado;
+
+        if (aDolares) {
+            const cobrarId = resultadoId.replace('resultado', 'cobrar');
+            if (!isNaN(resultado)) {
+                document.getElementById(cobrarId).innerHTML = `A cobrar: ${Math.ceil(resultado)} Bs<br>(${(resultado / tasa).toFixed(2)} USD)`;
+            } else {
+                document.getElementById(cobrarId).innerText = "";
+            }
         }
     }
-}
 
-    // Manejo del menú desplegable para la tasa
     document.getElementById('tasa-text').addEventListener('click', () => {
         document.getElementById('tasa-dropdown').classList.toggle('hidden');
     });
@@ -250,27 +249,30 @@ function convertir(input, resultadoId, aDolares) {
         item.addEventListener('click', (e) => {
             tasaSeleccionada = e.target.dataset.value;
             guardarTasaSeleccionada(tasaSeleccionada);
+            document.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('selected'));
+            e.target.closest('.dropdown-item').classList.add('selected');
             actualizarTasa();
             document.getElementById('tasa-dropdown').classList.add('hidden');
         });
     });
 
-    // Funcionalidad para el tema
     document.getElementById('theme-toggle').addEventListener('click', () => {
         const currentTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
         document.body.classList.remove(currentTheme);
         document.body.classList.add(newTheme);
-
         document.getElementById('theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
-        localStorage.setItem('theme', newTheme); // Guardar el tema en localStorage
+        localStorage.setItem('theme', newTheme);
     });
 
     document.getElementById('reset-btn').addEventListener('click', () => {
         location.reload();
     });
 
+    document.addEventListener('DOMContentLoaded', () => {
+        const selectedItem = document.querySelector(`.dropdown-item[data-value="${tasaSeleccionada}"]`);
+        if (selectedItem) selectedItem.classList.add('selected');
+    });
 </script>
-
 </body>
 </html>
