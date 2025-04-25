@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organigrama FAB - Blanco y Negro</title>
+  <style>
+    :root {
+      --node-width: 280px;
+      --node-padding: 20px;
+      --icon-size: 60px;
+      --gap-vertical: 60px;
+    }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #ffffff;
+      display: flex;
+      justify-content: center;
+      padding: 40px 0;
+      color: #000;
+    }
+    .org-chart {
+      display: grid;
+      grid-row-gap: var(--gap-vertical);
+      width: 100%;
+      max-width: 1400px;
+    }
+    .level {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 60px;
+    }
+    .node {
+      background: #ffffff;
+      border: 2px solid #000000;
+      border-radius: 8px;
+      width: var(--node-width);
+      padding: var(--node-padding);
+      text-align: center;
+      position: relative;
+    }
+    .node::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: var(--gap-vertical);
+      background: #000000;
+      top: 100%;
+    }
+    .level-3 .node::after { display: none; }
+    .node-icon {
+      width: var(--icon-size);
+      height: var(--icon-size);
+      margin-bottom: 15px;
+    }
+    .node-title {
+      font-size: 1.3em;
+      font-weight: bold;
+      color: #000000;
+      margin-bottom: 15px;
+    }
+    .node-content {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .item-box {
+      background: #ffffff;
+      border: 1px solid #000000;
+      border-radius: 4px;
+      padding: 8px;
+      font-size: 0.95em;
+      color: #000000;
+      line-height: 1.4;
+    }
+    .connector-row {
+      display: flex;
+      justify-content: center;
+      position: relative;
+      margin-bottom: -2px;
+    }
+    .connector-row::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: calc(50% - var(--node-width)/2 - 30px);
+      width: calc(var(--node-width) + 60px);
+      height: 2px;
+      background: #000000;
+    }
+    .connector-row .node::after { display: none; }
+  </style>
+</head>
+<body>
+  <div class="org-chart">
+    <!-- Nivel 1 -->
+    <div class="level level-1">
+      <div class="node">
+        <img src="https://img.icons8.com/?size=100&id=4695&format=png&color=000000" class="node-icon" alt="Comandancia General">
+        <div class="node-title">COMANDANCIA GENERAL</div>
+        <div class="node-content">
+          <div class="item-box">Presidente de la República</div>
+          <div class="item-box">Ministro del Poder Popular para la Defensa</div>
+          <div class="item-box">Comandante General de la Aviación (General de División)</div>
+        </div>
+      </div>
+    </div>
+    <div class="connector-row"></div>
+    <!-- Nivel 2 -->
+    <div class="level level-2">
+      <div class="node">
+        <img src="https://img.icons8.com/?size=100&id=bAfOJAIUNSPM&format=png&color=000000" class="node-icon" alt="Estado Mayor">
+        <div class="node-title">ESTADO MAYOR</div>
+        <div class="node-content">
+          <div class="item-box">Jefe del Estado Mayor</div>
+          <div class="item-box">Dirección de Personal</div>
+          <div class="item-box">Dirección de Inteligencia</div>
+          <div class="item-box">Dirección de Operaciones</div>
+          <div class="item-box">Dirección de Logística</div>
+          <div class="item-box">Inspección General</div>
+        </div>
+      </div>
+      <div class="node">
+        <img src="https://img.icons8.com/ios/100/000000/airport.png" class="node-icon" alt="Estructura Operativa">
+        <div class="node-title">ESTRUCTURA OPERATIVA</div>
+        <div class="node-content">
+          <div class="item-box">Región Aérea Central</div>
+          <div class="item-box">Región Aérea Occidental</div>
+          <div class="item-box">Región Aérea Oriental</div>
+          <div class="item-box">Región Aérea Los Llanos</div>
+          <div class="item-box">Región Aérea Sur</div>
+        </div>
+      </div>
+    </div>
+    <div class="connector-row"></div>
+    <!-- Nivel 3 -->
+    <div class="level level-3">
+      <div class="node">
+        <img src="https://img.icons8.com/ios/100/000000/services.png" class="node-icon" alt="Direcciones de Apoyo">
+        <div class="node-title">DIRECCIONES DE APOYO</div>
+        <div class="node-content">
+          <div class="item-box">Educación</div>
+          <div class="item-box">Sanidad</div>
+          <div class="item-box">Ingeniería</div>
+          <div class="item-box">Finanzas</div>
+        </div>
+      </div>
+      <div class="node">
+        <img src="https://img.icons8.com/ios/100/000000/shield.png" class="node-icon" alt="Unidades Especiales">
+        <div class="node-title">UNIDADES ESPECIALES</div>
+        <div class="node-content">
+          <div class="item-box">Escuadrón Presidencial</div>
+          <div class="item-box">GOEA</div>
+          <div class="item-box">Defensa Antiaérea</div>
+        </div>
+      </div>
+      <div class="node">
+        <img src="https://img.icons8.com/ios/100/000000/company.png" class="node-icon" alt="Dependencias Adscritas">
+        <div class="node-title">DEPENDENCIAS ADSCRITAS</div>
+        <div class="node-content">
+          <div class="item-box">SAR</div>
+          <div class="item-box">CAVIM</div>
+          <div class="item-box">INAC</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
