@@ -26,11 +26,15 @@ header {
   color: white;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   position: relative;
+  
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 20px;
+
+  flex-wrap: wrap; /* permite que los elementos salten a la siguiente línea */
 }
+
 
 h1 {
   margin: 0;
