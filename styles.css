@@ -142,6 +142,15 @@ header button:hover {
   width: 90%;
 }
 
+/* Estilo especial para el botón de panadería */
+.nav-button[href="https://ajazzan.github.io/produccionpm/"] {
+    background-color: #8b5a2b;
+    border-radius: 50px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
 h3 {
   margin-top: 0;
   color: var(--primary-color);
